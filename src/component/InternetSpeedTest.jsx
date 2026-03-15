@@ -1,8 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import "./style.css";
 
 export default function InternetSpeedTest() {
   const [speed, setSpeed] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isp, setIsp] = useState("");
+
+  // Detect Internet Provider
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => {
+        setIsp(data.org);
+      })
+      .catch(() => {
+        setIsp("Unknown Network");
+      });
+  }, []);
 
   const startTest = () => {
     setLoading(true);
@@ -11,7 +25,7 @@ export default function InternetSpeedTest() {
     const imageAddr =
       "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg";
 
-    const downloadSize = 14679474; // bytes
+    const downloadSize = 14679474;
 
     const startTime = new Date().getTime();
 
@@ -19,20 +33,22 @@ export default function InternetSpeedTest() {
     img.src = imageAddr + "?cache=" + startTime;
 
     img.onload = function () {
-      const endTime = new Date().getTime();
-      const duration = (endTime - startTime) / 1000;
+      setTimeout(() => {
+        const endTime = new Date().getTime();
+        const duration = (endTime - startTime) / 1000;
 
-      const bitsLoaded = downloadSize * 8;
-      const speedBps = bitsLoaded / duration;
-      const speedKBps = speedBps / 1024;
-      const speedMBps = speedKBps / 1024;
+        const bitsLoaded = downloadSize * 8;
+        const speedBps = bitsLoaded / duration;
+        const speedKBps = speedBps / 1024;
+        const speedMBps = speedKBps / 1024;
 
-      setSpeed({
-        kb: speedKBps.toFixed(2),
-        mb: speedMBps.toFixed(2),
-      });
+        setSpeed({
+          kb: speedKBps.toFixed(2),
+          mb: speedMBps.toFixed(2),
+        });
 
-      setLoading(false);
+        setLoading(false);
+      }, 10000);
     };
 
     img.onerror = function () {
@@ -42,41 +58,37 @@ export default function InternetSpeedTest() {
   };
 
   return (
-    <div style={styles.container}>
-      <h1>Internet Speed Test</h1>
+    <div className="container">
 
-      <button onClick={startTest} disabled={loading} style={styles.button}>
-        {loading ? "Testing..." : "Start Test"}
-      </button>
+      <div className="bubbles">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
 
-      {speed && typeof speed === "object" && (
-        <div style={styles.result}>
-          <p>Speed: {speed.kb} KB/s</p>
-          <p>Speed: {speed.mb} MB/s</p>
-        </div>
-      )}
+      <div className="card">
+        <h1>My Internet Speed Test</h1>
 
-      {speed && typeof speed === "string" && (
-        <div style={styles.result}>{speed}</div>
-      )}
+        {/* Internet Provider Name */}
+        <p>Network: {isp}</p>
+
+        <button onClick={startTest} disabled={loading}>
+          {loading ? "Testing... (10s)" : "Start Test"}
+        </button>
+
+        {speed && typeof speed === "object" && (
+          <div className="result">
+            <p>Speed: {speed.kb} KB/s</p>
+            <p>Speed: {speed.mb} MB/s</p>
+          </div>
+        )}
+
+        {speed && typeof speed === "string" && (
+          <div className="result">{speed}</div>
+        )}
+      </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    textAlign: "center",
-    marginTop: "100px",
-    fontFamily: "Arial",
-  },
-  button: {
-    padding: "10px 20px",
-    fontSize: "18px",
-    cursor: "pointer",
-  },
-  result: {
-    marginTop: "20px",
-    fontSize: "20px",
-    fontWeight: "bold",
-  },
-};

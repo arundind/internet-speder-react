@@ -1,53 +1,109 @@
-import React, { useState } from "react";
+// import React, { useState } from "react";
 
-const SpeedTest = () => {
-  const [speed, setSpeed] = useState(null);
-  const [testing, setTesting] = useState(false);
+// const SpeedMeter = () => {
+//   const [speed, setSpeed] = useState(0);
+//   const [testing, setTesting] = useState(false);
 
-  const testDownloadSpeed = async () => {
-    setTesting(true);
-    setSpeed(null);
+//   const testSpeed = async () => {
+//     setTesting(true);
+//     setSpeed(0);
 
-    const imageAddr = "https://speed.hetzner.de/100MB.bin"; 
-    const fileSizeInBytes = 100 * 1024 * 1024; // 100MB
+//     const fileUrl =
+//       "https://corsproxy.io/?https://speed.hetzner.de/10MB.bin";
+//     const fileSize = 10 * 1024 * 1024; // 10MB
 
-    const startTime = new Date().getTime();
+//     const startTime = performance.now();
 
-    try {
-      const response = await fetch(imageAddr, { cache: "no-store" });
-      await response.blob(); // force full download
+//     try {
+//       const response = await fetch(fileUrl, { cache: "no-store" });
+//       await response.blob();
 
-      const endTime = new Date().getTime();
-      const durationInSeconds = (endTime - startTime) / 1000;
+//       const endTime = performance.now();
+//       const duration = (endTime - startTime) / 1000;
 
-      const bitsLoaded = fileSizeInBytes * 8;
-      const speedBps = bitsLoaded / durationInSeconds;
-      const speedMbps = (speedBps / (1024 * 1024)).toFixed(2);
+//       const bitsLoaded = fileSize * 8;
+//       const speedMbps = (bitsLoaded / duration / (1024 * 1024)).toFixed(2);
 
-      setSpeed(speedMbps);
-    } catch (error) {
-      console.error("Speed test failed:", error);
-      alert("Speed test failed. Try again.");
-    }
+//       animateSpeed(parseFloat(speedMbps));
+//     } catch (error) {
+//       alert("Speed test failed!");
+//       setTesting(false);
+//     }
+//   };
 
-    setTesting(false);
-  };
+//   const animateSpeed = (finalSpeed) => {
+//     let current = 0;
+//     const interval = setInterval(() => {
+//       if (current >= finalSpeed) {
+//         clearInterval(interval);
+//         setTesting(false);
+//       } else {
+//         current += finalSpeed / 50;
+//         setSpeed(current.toFixed(2));
+//       }
+//     }, 20);
+//   };
 
-  return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h2>Internet Speed Tester</h2>
+//   const getRotation = () => {
+//     const maxSpeed = 100;
+//     return (speed / maxSpeed) * 180;
+//   };
 
-      <button onClick={testDownloadSpeed} disabled={testing}>
-        {testing ? "Testing..." : "Start Speed Test"}
-      </button>
+//   return (
+//     <div style={styles.container}>
+//       <h2>WiFi Speed Meter</h2>
 
-      {speed && (
-        <h3 style={{ marginTop: "20px" }}>
-          Download Speed: {speed} Mbps
-        </h3>
-      )}
-    </div>
-  );
-};
+//       <div style={styles.meter}>
+//         <div
+//           style={{
+//             ...styles.needle,
+//             transform: `rotate(${getRotation()}deg)`,
+//           }}
+//         />
+//       </div>
 
-export default SpeedTest;
+//       <h3>{speed} Mbps</h3>
+
+//       <button onClick={testSpeed} disabled={testing} style={styles.button}>
+//         {testing ? "Testing..." : "Start Test"}
+//       </button>
+//     </div>
+//   );
+// };
+
+// const styles = {
+//   container: {
+//     textAlign: "center",
+//     marginTop: "60px",
+//     fontFamily: "Arial",
+//   },
+//   meter: {
+//     width: "300px",
+//     height: "150px",
+//     borderTopLeftRadius: "300px",
+//     borderTopRightRadius: "300px",
+//     border: "12px solid #ddd",
+//     borderBottom: "none",
+//     margin: "auto",
+//     position: "relative",
+//     background: "#f9f9f9",
+//   },
+//   needle: {
+//     width: "4px",
+//     height: "140px",
+//     background: "red",
+//     position: "absolute",
+//     bottom: "0",
+//     left: "50%",
+//     transformOrigin: "bottom",
+//     transition: "transform 0.2s ease-out",
+//   },
+//   button: {
+//     marginTop: "20px",
+//     padding: "10px 20px",
+//     fontSize: "16px",
+//     cursor: "pointer",
+//   },
+// };
+
+// export default SpeedMeter;
