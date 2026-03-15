@@ -19,10 +19,6 @@ export default function InternetSpeedTest() {
   }, []);
 
   const startTest = () => {
-
-    // prevent multiple clicks
-    if (loading) return;
-
     setLoading(true);
     setSpeed(null);
 
@@ -37,21 +33,22 @@ export default function InternetSpeedTest() {
     img.src = imageAddr + "?cache=" + startTime;
 
     img.onload = function () {
+      setTimeout(() => {
+        const endTime = new Date().getTime();
+        const duration = (endTime - startTime) / 1000;
 
-      const endTime = new Date().getTime();
-      const duration = (endTime - startTime) / 1000;
+        const bitsLoaded = downloadSize * 8;
+        const speedBps = bitsLoaded / duration;
+        const speedKBps = speedBps / 1024;
+        const speedMBps = speedKBps / 1024;
 
-      const bitsLoaded = downloadSize * 8;
-      const speedBps = bitsLoaded / duration;
-      const speedKBps = speedBps / 1024;
-      const speedMBps = speedKBps / 1024;
+        setSpeed({
+          kb: speedKBps.toFixed(2),
+          mb: speedMBps.toFixed(2),
+        });
 
-      setSpeed({
-        kb: speedKBps.toFixed(2),
-        mb: speedMBps.toFixed(2),
-      });
-
-      setLoading(false);
+        setLoading(false);
+      }, 10000);
     };
 
     img.onerror = function () {
@@ -63,13 +60,22 @@ export default function InternetSpeedTest() {
   return (
     <div className="container">
 
+      <div className="bubbles">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
       <div className="card">
         <h1>My Internet Speed Test</h1>
 
+        {/* Internet Provider Name */}
         <p>Network: {isp}</p>
 
         <button onClick={startTest} disabled={loading}>
-          {loading ? "Testing..." : "Start Test"}
+          {loading ? "Testing... (10s)" : "Start Test"}
         </button>
 
         {speed && typeof speed === "object" && (
