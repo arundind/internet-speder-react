@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import "./style.css";
 
 export default function InternetSpeedTest() {
-  const [speed, setSpeed] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [isp, setIsp] = useState("");
 
-  // Detect Internet Provider
+  const [downloadSpeed, setDownloadSpeed] = useState(null);
+  const [uploadSpeed, setUploadSpeed] = useState(null);
+  const [isp, setIsp] = useState("");
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     fetch("https://ipapi.co/json/")
       .then((res) => res.json())
@@ -19,76 +20,143 @@ export default function InternetSpeedTest() {
   }, []);
 
   const startTest = () => {
+
     setLoading(true);
-    setSpeed(null);
+    setDownloadSpeed(null);
+    setUploadSpeed(null);
 
-    const imageAddr =
-      "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg";
+    testDownload().then(() => {
+      testUpload().then(() => {
+        setLoading(false);
+      });
+    });
 
-    const downloadSize = 14679474;
+  };
 
-    const startTime = new Date().getTime();
+  // DOWNLOAD TEST
+  const testDownload = () => {
 
-    const img = new Image();
-    img.src = imageAddr + "?cache=" + startTime;
+    return new Promise((resolve) => {
 
-    img.onload = function () {
-      setTimeout(() => {
+      const imageAddr =
+        "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg";
+
+      const downloadSize = 14679474;
+
+      const startTime = new Date().getTime();
+
+      const img = new Image();
+      img.src = imageAddr + "?cache=" + startTime;
+
+      img.onload = function () {
+
         const endTime = new Date().getTime();
         const duration = (endTime - startTime) / 1000;
 
         const bitsLoaded = downloadSize * 8;
-        const speedBps = bitsLoaded / duration;
-        const speedKBps = speedBps / 1024;
-        const speedMBps = speedKBps / 1024;
+        const speedMbps = (bitsLoaded / duration / 1024 / 1024).toFixed(2);
 
-        setSpeed({
-          kb: speedKBps.toFixed(2),
-          mb: speedMBps.toFixed(2),
+        setDownloadSpeed(speedMbps);
+
+        resolve();
+      };
+
+      img.onerror = function () {
+        setDownloadSpeed("Error");
+        resolve();
+      };
+
+    });
+
+  };
+
+  // UPLOAD TEST
+  const testUpload = () => {
+
+    return new Promise((resolve) => {
+
+      const data = new Blob([new ArrayBuffer(5 * 1024 * 1024)]);
+
+      const startTime = new Date().getTime();
+
+      fetch("https://httpbin.org/post", {
+        method: "POST",
+        body: data,
+      })
+        .then(() => {
+
+          const endTime = new Date().getTime();
+          const duration = (endTime - startTime) / 1000;
+
+          const bitsUploaded = data.size * 8;
+
+          const speedMbps = (
+            bitsUploaded /
+            duration /
+            1024 /
+            1024
+          ).toFixed(2);
+
+          setUploadSpeed(speedMbps);
+
+          resolve();
+        })
+        .catch(() => {
+          setUploadSpeed("Error");
+          resolve();
         });
 
-        setLoading(false);
-      }, 10000);
-    };
+    });
 
-    img.onerror = function () {
-      setSpeed("Error testing speed");
-      setLoading(false);
-    };
   };
 
   return (
+
     <div className="container">
 
+      {/* BUBBLE BACKGROUND */}
+
       <div className="bubbles">
+
         <span></span>
         <span></span>
         <span></span>
         <span></span>
         <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+
       </div>
+
+      {/* MAIN CARD */}
 
       <div className="card">
+
         <h1>My Internet Speed Test</h1>
 
-        {/* Internet Provider Name */}
-        <p>Network: {isp}</p>
+        <p>Your Use Network: {isp}</p>
 
         <button onClick={startTest} disabled={loading}>
-          {loading ? "Testing... (10s)" : "Start Test"}
+          {loading ? "Testing..." : "Start Test"}
         </button>
 
-        {speed && typeof speed === "object" && (
-          <div className="result">
-            <p>Speed: {speed.kb} KB/s</p>
-            <p>Speed: {speed.mb} MB/s</p>
-          </div>
-        )}
+        <div className="result">
 
-        {speed && typeof speed === "string" && (
-          <div className="result">{speed}</div>
-        )}
+          {downloadSpeed && (
+            <p>⬇ Download: {downloadSpeed} Mbps</p>
+          )}
+
+          {uploadSpeed && (
+            <p>⬆ Upload: {uploadSpeed} Mbps</p>
+          )}
+
+        </div>
+
       </div>
+
     </div>
+
   );
+
 }
